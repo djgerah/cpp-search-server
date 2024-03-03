@@ -6,7 +6,10 @@
 #include <string>
 #include <utility>
 #include <vector>
-
+/*  В задачах практикума экономилась каждая строчка, не пропускалась ни одна (почти). Я бы так вообще разделял пустой 
+строкой всё, что только можно. Боялся переборщить.
+    Мне нравится писать return ровно под типом возвращаемого элемента функции. Но если и здесь требуется сделать 
+отступ в 4 пробела, то исправлю. Но не гарантирую, что не продолжу этого делать в задачах не на ревью. =)) */
 using namespace std;
 
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
@@ -23,6 +26,7 @@ int ReadLineWithNumber()
 {    
     int result = 0;
     cin >> result;
+
     ReadLine();
 
 return result;
@@ -33,25 +37,27 @@ vector<string> SplitIntoWords(const string& text)
     vector<string> words;
     string word;
     
-    for (const char ch : text) 
-    {
-        if (ch == ' ') 
+        for (const char ch : text) 
         {
-            if (!word.empty()) 
+            if (ch == ' ') 
             {
-                words.push_back(word);
-                word.clear();
+                if (!word.empty()) 
+                {
+                    words.push_back(word);
+                    word.clear();
+                }
+            } 
+            else 
+            {
+                word += ch;
             }
-        } 
-        else 
-        {
-            word += ch;
         }
-    }
-    if (!word.empty()) 
-    {
-        words.push_back(word);
-    }
+
+        if (!word.empty()) 
+        {
+            words.push_back(word);
+        }
+
 return words;
 }
 
@@ -67,7 +73,6 @@ public:
     
     void SetStopWords(const string& text) 
     {
-        
         for (const string& word : SplitIntoWords(text)) 
         {
             stop_words_.insert(word);
@@ -79,10 +84,10 @@ public:
         const vector<string> words = SplitIntoWordsNoStop(document);
         int N = words.size();
         
-        for (const string& word : words) 
-        {
-            word_to_document_freqs_[word][document_id]+= 1.0 / N;
-        }
+            for (const string& word : words) 
+            {
+                word_to_document_freqs_[word][document_id]+= 1.0 / N;
+            }
         ++document_count_;
     }
     
@@ -96,10 +101,12 @@ public:
         {
         return lhs.relevance > rhs.relevance;
         }   );
-        if (matched_documents.size() > MAX_RESULT_DOCUMENT_COUNT) 
-        {
-            matched_documents.resize(MAX_RESULT_DOCUMENT_COUNT);
-        }
+
+            if (matched_documents.size() > MAX_RESULT_DOCUMENT_COUNT) 
+            {
+                matched_documents.resize(MAX_RESULT_DOCUMENT_COUNT);
+            }
+
     return matched_documents;
     }
 
@@ -124,13 +131,14 @@ private:
     {    
         vector<string> words;
         
-        for (const string& word : SplitIntoWords(text)) 
-        {
-            if (!IsStopWord(word)) 
+            for (const string& word : SplitIntoWords(text)) 
             {
-                words.push_back(word);
+                if (!IsStopWord(word)) 
+                {
+                    words.push_back(word);
+                }
             }
-        }
+
     return words;
     }
     
@@ -138,19 +146,20 @@ private:
     {    
         Query query;
         
-        for (string& word : SplitIntoWordsNoStop(text)) 
-        {    
-            if (word[0] == '-') 
-            {
-                word = word.substr(1);
-                
-                if (!IsStopWord(word)) 
+            for (string& word : SplitIntoWordsNoStop(text)) 
+            {    
+                if (word[0] == '-') 
                 {
-                query.minus_words.insert(word);
+                    word = word.substr(1);
+                
+                    if (!IsStopWord(word)) 
+                    {
+                    query.minus_words.insert(word);
+                    }
                 }
+                query.plus_words.insert(word);
             }
-            query.plus_words.insert(word);
-        }
+
     return query;
     }
 
@@ -159,35 +168,40 @@ private:
         vector<Document> matched_documents;
         map<int, double> document_to_relevance;
         
-        for (const string& word : query_words.plus_words) 
-        {    
-            if (word_to_document_freqs_.count(word) == 0) 
-            {
-            continue;
-            }
-            const double IDF = log(static_cast <double> (document_count_) / word_to_document_freqs_.at(word).size());
+            for (const string& word : query_words.plus_words) 
+            {    
+                if (word_to_document_freqs_.count(word) == 0) 
+                {   
+                    continue;
+                }
+
+                const double IDF = log(static_cast <double> (document_count_) 
+                                    / word_to_document_freqs_.at(word).size());
             
-            for (const auto& [document_id, TF] : word_to_document_freqs_.at(word)) 
-            {     
-                document_to_relevance[document_id] += IDF * TF;
+                    for (const auto& [document_id, TF] : word_to_document_freqs_.at(word)) 
+                    {     
+                        document_to_relevance[document_id] += IDF * TF;
+                    }
             }
-        }
         
-        for (const string& word : query_words.minus_words) 
-        {    
-            if (word_to_document_freqs_.count(word) == 0) 
+            for (const string& word : query_words.minus_words) 
+            {    
+                if (word_to_document_freqs_.count(word) == 0) 
+                {
+                    continue;
+                }
+
+                    for (const auto& [document_id, TF] : word_to_document_freqs_.at(word)) 
+                    {     
+                        document_to_relevance.erase(document_id);
+                    }
+            }
+
+            for (auto& [document_id, relevance] : document_to_relevance) 
             {
-            continue;
+                matched_documents.push_back({ document_id, relevance });
             }
-            for (const auto& [document_id, TF] : word_to_document_freqs_.at(word)) 
-            {     
-                document_to_relevance.erase(document_id);
-            }
-        }
-        for (auto& [document_id, relevance] : document_to_relevance) 
-        {
-            matched_documents.push_back({ document_id, relevance });
-        }
+
     return matched_documents;
     }
 };
@@ -198,10 +212,11 @@ SearchServer CreateSearchServer()
     search_server.SetStopWords(ReadLine());
     const int document_count = ReadLineWithNumber();
     
-    for (int document_id = 0; document_id < document_count; ++document_id) 
-    {
-        search_server.AddDocument(document_id, ReadLine());
-    }
+        for (int document_id = 0; document_id < document_count; ++document_id) 
+        {
+            search_server.AddDocument(document_id, ReadLine());
+        }
+
 return search_server;
 }
 
@@ -210,9 +225,10 @@ int main()
     const SearchServer search_server = CreateSearchServer();
     const string query = ReadLine();
     
-for (const auto& [document_id, relevance] : search_server.FindTopDocuments(query)) 
-{        
-    cout << "{ document_id = "s << document_id << ", " << "relevance = "s << relevance << " }"s << endl;
-}
+        for (const auto& [document_id, relevance] : search_server.FindTopDocuments(query)) 
+        {        
+            cout << "{ document_id = "s << document_id << ", " << "relevance = "s << relevance << " }"s << endl;
+        }
+
 return 0;
 }
