@@ -82,7 +82,7 @@ public:
         
             for (const string& word : words) 
             {
-                word_to_document_freqs_[word][document_id]+= 1.0 / N;
+        word_to_document_freqs_[word][document_id]+= 1.0 / N;
             }
         ++document_count_;
     }
@@ -168,8 +168,7 @@ private:
                         continue;
                     }
 
-                    const double IDF = log(static_cast <double> (document_count_) 
-                                        / word_to_document_freqs_.at(word).size());
+    const double IDF = log(static_cast <double> (document_count_) / word_to_document_freqs_.at(word).size());
             
                         for (const auto& [document_id, TF] : word_to_document_freqs_.at(word)) 
                         {     
