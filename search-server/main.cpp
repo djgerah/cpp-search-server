@@ -15,6 +15,7 @@ string ReadLine()
 {    
     string line;
     getline(cin, line);
+    
     return line;
 }
 
@@ -22,7 +23,9 @@ int ReadLineWithNumber()
 {    
     int result = 0;
     cin >> result;
+
     ReadLine();
+    
     return result;
 }
 
@@ -89,17 +92,17 @@ public:
         const Query query_words = ParseQuery(raw_query);
         auto matched_documents = FindAllDocuments(query_words);
 
-        sort(matched_documents.begin(), matched_documents.end(), 
-        [](const Document& lhs, const Document& rhs)
-        {
-        return lhs.relevance > rhs.relevance;
-        }   );
-
-            if (matched_documents.size() > MAX_RESULT_DOCUMENT_COUNT) 
+            sort(matched_documents.begin(), matched_documents.end(), 
+            [](const Document& lhs, const Document& rhs)
             {
-                matched_documents.resize(MAX_RESULT_DOCUMENT_COUNT);
-            }
-        return matched_documents;
+            return lhs.relevance > rhs.relevance;
+            }   );
+
+                if (matched_documents.size() > MAX_RESULT_DOCUMENT_COUNT) 
+                {
+                    matched_documents.resize(MAX_RESULT_DOCUMENT_COUNT);
+                }
+            return matched_documents;
     }
 
 private:
@@ -114,85 +117,85 @@ private:
     map<string, map<int, double>> word_to_document_freqs_;
     set<string> stop_words_;
     
-    bool IsStopWord(const string& word) const 
-    {
-    return stop_words_.count(word) > 0;
-    }
+        bool IsStopWord(const string& word) const 
+        {
+        return stop_words_.count(word) > 0;
+        }
     
-    vector<string> SplitIntoWordsNoStop(const string& text) const 
-    {    
-        vector<string> words;
+        vector<string> SplitIntoWordsNoStop(const string& text) const 
+        {    
+            vector<string> words;
         
-            for (const string& word : SplitIntoWords(text)) 
-            {
-                if (!IsStopWord(word)) 
+                for (const string& word : SplitIntoWords(text)) 
                 {
-                    words.push_back(word);
-                }
-            }
-        return words;
-    }
-    
-    Query ParseQuery(const string& text) const 
-    {    
-        Query query;
-        
-            for (string& word : SplitIntoWordsNoStop(text)) 
-            {    
-                if (word[0] == '-') 
-                {
-                    word = word.substr(1);
-                
                     if (!IsStopWord(word)) 
                     {
-                    query.minus_words.insert(word);
+                        words.push_back(word);
                     }
                 }
-                query.plus_words.insert(word);
-            }
-        return query;
-    }
-
-    vector<Document> FindAllDocuments(const Query& query_words) const 
-    {    
-        vector<Document> matched_documents;
-        map<int, double> document_to_relevance;
+            return words;
+        }
+    
+        Query ParseQuery(const string& text) const 
+        {    
+            Query query;
         
-            for (const string& word : query_words.plus_words) 
-            {    
-                if (word_to_document_freqs_.count(word) == 0) 
-                {   
-                    continue;
+                for (string& word : SplitIntoWordsNoStop(text)) 
+                {    
+                    if (word[0] == '-') 
+                    {
+                        word = word.substr(1);
+                
+                        if (!IsStopWord(word)) 
+                        {
+                        query.minus_words.insert(word);
+                        }
+                    }
+                    query.plus_words.insert(word);
                 }
+            return query;
+        }
 
-                const double IDF = log(static_cast <double> (document_count_) 
-                                    / word_to_document_freqs_.at(word).size());
+        vector<Document> FindAllDocuments(const Query& query_words) const 
+        {    
+            vector<Document> matched_documents;
+            map<int, double> document_to_relevance;
+        
+                for (const string& word : query_words.plus_words) 
+                {    
+                    if (word_to_document_freqs_.count(word) == 0) 
+                    {   
+                        continue;
+                    }
+
+                    const double IDF = log(static_cast <double> (document_count_) 
+                                        / word_to_document_freqs_.at(word).size());
             
-                    for (const auto& [document_id, TF] : word_to_document_freqs_.at(word)) 
-                    {     
-                        document_to_relevance[document_id] += IDF * TF;
-                    }
-            }
+                        for (const auto& [document_id, TF] : word_to_document_freqs_.at(word)) 
+                        {     
+                            document_to_relevance[document_id] += IDF * TF;
+                        }
+                }
         
-            for (const string& word : query_words.minus_words) 
-            {    
-                if (word_to_document_freqs_.count(word) == 0) 
-                {
-                    continue;
+                for (const string& word : query_words.minus_words) 
+                {    
+                    if (word_to_document_freqs_.count(word) == 0) 
+                    {
+                        continue;
+                    }
+
+                        for (const auto& [document_id, TF] : word_to_document_freqs_.at(word)) 
+                        {     
+                            document_to_relevance.erase(document_id);
+                        }
                 }
 
-                    for (const auto& [document_id, TF] : word_to_document_freqs_.at(word)) 
-                    {     
-                        document_to_relevance.erase(document_id);
-                    }
-            }
-
-            for (auto& [document_id, relevance] : document_to_relevance) 
-            {
-                matched_documents.push_back({ document_id, relevance });
-            }
-        return matched_documents;
-    }
+                for (auto& [document_id, relevance] : document_to_relevance) 
+                {
+                    matched_documents.push_back({ document_id, relevance });
+                }
+            return matched_documents;
+        }
 };
 
 SearchServer CreateSearchServer() 
