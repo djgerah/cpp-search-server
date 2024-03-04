@@ -50,11 +50,11 @@ vector<string> SplitIntoWords(const string& text)
             }
         }
 
-        if (!word.empty()) 
-        {
-            words.push_back(word);
-        }
-    return words;
+                if (!word.empty()) 
+                {
+                    words.push_back(word);
+                }
+        return words;
 }
 
 struct Document 
