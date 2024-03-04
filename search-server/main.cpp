@@ -6,10 +6,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-/*  В задачах практикума экономилась каждая строчка, не пропускалась ни одна (почти). Я бы так вообще разделял пустой 
-строкой всё, что только можно. Боялся переборщить.
-    Мне нравится писать return ровно под типом возвращаемого элемента функции. Но если и здесь требуется сделать 
-отступ в 4 пробела, то исправлю. Но не гарантирую, что не продолжу этого делать в задачах не на ревью. =)) */
+
 using namespace std;
 
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
@@ -18,18 +15,15 @@ string ReadLine()
 {    
     string line;
     getline(cin, line);
-    
-return line;
+    return line;
 }
 
 int ReadLineWithNumber() 
 {    
     int result = 0;
     cin >> result;
-
     ReadLine();
-
-return result;
+    return result;
 }
 
 vector<string> SplitIntoWords(const string& text) 
@@ -57,8 +51,7 @@ vector<string> SplitIntoWords(const string& text)
         {
             words.push_back(word);
         }
-
-return words;
+    return words;
 }
 
 struct Document 
@@ -106,8 +99,7 @@ public:
             {
                 matched_documents.resize(MAX_RESULT_DOCUMENT_COUNT);
             }
-
-    return matched_documents;
+        return matched_documents;
     }
 
 private:
@@ -138,8 +130,7 @@ private:
                     words.push_back(word);
                 }
             }
-
-    return words;
+        return words;
     }
     
     Query ParseQuery(const string& text) const 
@@ -159,8 +150,7 @@ private:
                 }
                 query.plus_words.insert(word);
             }
-
-    return query;
+        return query;
     }
 
     vector<Document> FindAllDocuments(const Query& query_words) const 
@@ -201,8 +191,7 @@ private:
             {
                 matched_documents.push_back({ document_id, relevance });
             }
-
-    return matched_documents;
+        return matched_documents;
     }
 };
 
@@ -216,8 +205,7 @@ SearchServer CreateSearchServer()
         {
             search_server.AddDocument(document_id, ReadLine());
         }
-
-return search_server;
+    return search_server;
 }
 
 int main() 
@@ -229,6 +217,5 @@ int main()
         {        
             cout << "{ document_id = "s << document_id << ", " << "relevance = "s << relevance << " }"s << endl;
         }
-
-return 0;
+    return 0;
 }
