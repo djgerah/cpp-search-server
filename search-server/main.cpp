@@ -154,7 +154,7 @@ private:
         return query;
     }
 
-    double TF_IDF_calculation(int document_count_, string word, double TF) const 
+    double TtIdfCalculation(int document_count_, string word, double TF) const 
     {
         double TF_IDF = (log(static_cast <double> (document_count_) 
                         / word_to_document_freqs_.at(word).size())) * TF;
@@ -177,7 +177,7 @@ private:
             for (const auto& [document_id, TF] : word_to_document_freqs_.at(word)) 
             {     
                 document_to_relevance[document_id] 
-                    += TF_IDF_calculation(document_count_, word, TF);
+                    += TtIdfCalculation(document_count_, word, TF);
             }
         }
         
